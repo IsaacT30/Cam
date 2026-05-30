@@ -18,7 +18,7 @@ html {
 
 body {
   font-family: 'Satisfy', cursive;
-  background: #1a1a2e;
+  background: transparent;
   min-height: 100%;
   min-height: -webkit-fill-available;
   overflow-x: hidden;

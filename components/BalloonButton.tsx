@@ -234,26 +234,61 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
                 height: `${getBalloonSize() * 1.2}px`,
               }}
             >
-              {/* Silueta del globo con borde */}
-              <svg
-                viewBox="0 0 100 120"
-                className="w-full h-full"
-                style={{
-                  filter: `drop-shadow(0 ${10 + clicks * 1.5}px ${20 + clicks * 2}px rgba(255, 105, 180, ${0.3 + clicks * 0.02}))`,
-                }}
-              >
-                {/* Globo - solo silueta con borde */}
+              {/* Globo con color rosa degradado */}
+                <defs>
+                  <linearGradient id="balloonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ff69b4" />
+                    <stop offset="50%" stopColor="#ff1493" />
+                    <stop offset="100%" stopColor="#dc143c" />
+                  </linearGradient>
+                  <radialGradient id="balloonShine" cx="30%" cy="30%" r="50%">
+                    <stop offset="0%" stopColor="rgba(255,255,255,0.6)" />
+                    <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                  </radialGradient>
+                </defs>
                 <ellipse
                   cx="50"
                   cy="45"
                   rx="40"
                   ry="45"
-                  fill="transparent"
-                  stroke="#ff69b4"
-                  strokeWidth="3"
+                  fill="url(#balloonGradient)"
+                  stroke="#ff1493"
+                  strokeWidth="2"
                   style={{
-                    filter: 'drop-shadow(0 0 10px rgba(255, 105, 180, 0.5))',
+                    filter: 'drop-shadow(0 8px 20px rgba(255, 20, 147, 0.5))',
                   }}
+                />
+                {/* Brillo del globo */}
+                <ellipse
+                  cx="50"
+                  cy="45"
+                  rx="40"
+                  ry="45"
+                  fill="url(#balloonShine)"
+                />
+                {/* Nudo del globo */}
+                <path
+                  d="M45 90 Q50 95 55 90 L52 95 L48 95 Z"
+                  fill="#ff1493"
+                  stroke="#dc143c"
+                  strokeWidth="1"
+                />
+                {/* Hilo del globo */}
+                <path
+                  d="M50 95 Q55 105 45 115 Q55 110 50 120"
+                  fill="none"
+                  stroke="#8B4513"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                {/* Brillo grande */}
+                <ellipse
+                  cx="35"
+                  cy="30"
+                  rx="10"
+                  ry="15"
+                  fill="rgba(255, 255, 255, 0.4)"
+                  transform="rotate(-30 35 30)"
                 />
                 {/* Nudo del globo */}
                 <path
@@ -310,7 +345,7 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.2 }}
-                    className="relative w-24 h-32 rounded-lg overflow-hidden border-4 border-pink-300 shadow-lg"
+                    className="relative w-32 h-44 rounded-lg overflow-hidden border-4 border-pink-300 shadow-lg"
                     style={{
                       transform: index === 0 ? 'rotate(-5deg)' : 'rotate(3deg)',
                     }}
@@ -376,7 +411,7 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
                     initial={{ opacity: 0, x: 50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.2 }}
-                    className="relative w-24 h-32 rounded-lg overflow-hidden border-4 border-pink-300 shadow-lg"
+                    className="relative w-32 h-44 rounded-lg overflow-hidden border-4 border-pink-300 shadow-lg"
                     style={{
                       transform: index === 0 ? 'rotate(5deg)' : 'rotate(-3deg)',
                     }}
@@ -399,7 +434,7 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 + index * 0.1 }}
-                    className="relative w-16 h-20 sm:w-20 sm:h-24 rounded-lg overflow-hidden border-3 border-pink-300 shadow-lg"
+                    className="relative w-20 h-28 sm:w-24 sm:h-32 rounded-lg overflow-hidden border-3 border-pink-300 shadow-lg"
                     style={{
                       transform: `rotate(${(index - 1.5) * 5}deg)`,
                     }}
