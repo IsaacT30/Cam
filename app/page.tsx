@@ -7,6 +7,7 @@ import WishModal from '@/components/WishModal'
 import PhotoGallery from '@/components/PhotoGallery'
 import BalloonButton from '@/components/BalloonButton'
 import PasswordScreen from '@/components/PasswordScreen'
+import AudioController from '@/components/AudioController'
 import Image from 'next/image'
 
 type Page = 'home' | 'wishes' | 'gallery' | 'balloon'
@@ -22,12 +23,14 @@ export default function Home() {
     'Que esos pensamientos negativos que a veces te invaden se vayan y los reemplaces por amor propio y confianza en ti misma',
   ]
 
-  if (!isAuthenticated) {
-    return <PasswordScreen onSuccess={() => setIsAuthenticated(true)} />
-  }
-
   return (
     <div className="w-full">
+      {/* Audio global que suena desde el inicio */}
+      <AudioController src="/assets/CUMPLE.mp3" />
+      
+      {!isAuthenticated ? (
+        <PasswordScreen onSuccess={() => setIsAuthenticated(true)} />
+      ) : (
       <AnimatePresence mode="wait">
         {currentPage === 'home' && (
           <motion.div
@@ -368,6 +371,7 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+      )}
     </div>
   )
 }
