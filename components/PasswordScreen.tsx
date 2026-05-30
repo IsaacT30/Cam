@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface PasswordScreenProps {
@@ -8,7 +8,7 @@ interface PasswordScreenProps {
 }
 
 export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
-  const [password, setPassword] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [hearts, setHearts] = useState<{ id: number; x: number; delay: number }[]>([])
@@ -27,20 +27,24 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const password = inputRef.current?.value || ''
     if (password === correctPassword) {
       onSuccess()
     } else {
       setError(true)
       setTimeout(() => setError(false), 1000)
-      setPassword('')
+      if (inputRef.current) {
+        inputRef.current.value = ''
+      }
     }
   }
 
   return (
     <div 
-      className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden"
+      className="w-full min-h-screen flex items-center justify-center overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #ff6b9d 0%, #c44569 50%, #ff6b9d 100%)',
+        position: 'relative',
       }}
     >
       {/* Corazones flotantes de fondo */}
@@ -124,13 +128,12 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
             transition={{ duration: 0.4 }}
           >
             <input
+              ref={inputRef}
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               placeholder="💕 Contraseña..."
               className={`w-64 md:w-80 px-6 py-4 text-xl text-center rounded-full border-4 outline-none transition-all ${
                 error 
-                  ? 'border-red-500 bg-red-100' 
+                  ? 'border-red-500 bg-red-100 text-red-900' 
                   : 'border-white/50 bg-white/20 text-white placeholder-white/70 focus:border-white focus:bg-white/30'
               }`}
               style={{ fontFamily: "'Poppins', sans-serif" }}
@@ -150,15 +153,13 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
             )}
           </AnimatePresence>
 
-          <motion.button
+          <button
             type="submit"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-10 py-4 bg-white text-pink-600 font-bold text-xl rounded-full shadow-xl hover:shadow-2xl transition-all"
+            className="px-10 py-4 bg-white text-pink-600 font-bold text-xl rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
             Entrar 💖
-          </motion.button>
+          </button>
         </motion.form>
 
         {/* Pista */}

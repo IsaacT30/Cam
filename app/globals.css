@@ -12,14 +12,19 @@
 
 html {
   scroll-behavior: smooth;
+  height: 100%;
 }
 
 body {
   font-family: 'Satisfy', cursive;
   background: #1a1a2e;
-  min-height: 100vh;
+  min-height: 100%;
   overflow-x: hidden;
   color: white;
+}
+
+#__next {
+  min-height: 100vh;
 }
 
 /* Títulos con Rubik Glitch */
