@@ -206,7 +206,7 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
     return 120 + percentage * 100
   }
 
-  const photos = ['/assets/c2.jpeg', '/assets/c3.jpeg', '/assets/c4.jpeg', '/assets/c5.jpeg']
+  const photos = ['/assets/c2.jpeg', '/assets/c9.jpeg', '/assets/c8.jpeg', '/assets/c3.jpeg']
 
   return (
     <>

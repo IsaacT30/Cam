@@ -223,7 +223,7 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
             textShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
           }}
         >
-          Hola Neni Cumpleañera
+          ¡Feliz Cumpleaños, Vale!
         </motion.h1>
 
         <motion.p
@@ -233,7 +233,7 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
           className="text-xl md:text-2xl text-white/90 mb-4"
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
-          Ingresa la contraseña para ver tu sorpresa
+          Ingresa la contraseña para ver lo que te hice con mucho cariño
         </motion.p>
 
         <motion.p
@@ -243,7 +243,7 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
           className="text-lg text-pink-300 mb-8"
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
-          La clave es única 💕
+          La clave es única, no la vas a poder compartir porque se bloqueará después de usarla 💕
         </motion.p>
 
         {/* Formulario */}

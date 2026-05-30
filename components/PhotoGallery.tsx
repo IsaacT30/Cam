@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 
 const photos = [
-  { id: 4, src: '/assets/c4.jpeg', caption: 'DONDE CONOCI A CAMI' },
-  { id: 5, src: '/assets/c5.jpeg', caption: 'DONDE ESTOY CONOCIENDO A VALE' },
-  { id: 6, src: '/assets/c6.jpeg', caption: 'LO QUE COMPARTIMOS JUNTOS' },
-  { id: 7, src: '/assets/c7.jpeg', caption: 'ALGO QUE JAMAS ME OLVIDARE' },
+  { id: 4, src: '/assets/c10.jpeg', caption: 'DONDE CONOCI A CAMI' },
+  { id: 5, src: '/assets/c7.jpeg', caption: 'DONDE ESTOY CONOCIENDO A VALE' },
+  { id: 6, src: '/assets/c5.jpeg', caption: 'LO QUE COMPARTIMOS JUNTOS' },
+  { id: 7, src: '/assets/c6.jpeg', caption: 'ALGO QUE JAMAS ME OLVIDARE' },
 ]
 
 export default function PhotoGallery() {
