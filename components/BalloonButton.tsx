@@ -36,7 +36,7 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
 
   useEffect(() => {
     // Crear el elemento de audio
-    audioRef.current = new Audio('/assets/cumple.mp3')
+    audioRef.current = new Audio('/assets/CUMPLE.mp3')
     audioRef.current.loop = true
 
     return () => {
