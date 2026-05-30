@@ -10,59 +10,61 @@ interface AudioControllerProps {
 export default function AudioController({ src }: AudioControllerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [isMuted, setIsMuted] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [hasStarted, setHasStarted] = useState(false)
 
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
 
-    // Configurar el audio para loop infinito
     audio.loop = true
     audio.volume = 0.7
 
-    // Intentar reproducir automáticamente
-    const playAudio = async () => {
+    // Función para iniciar el audio
+    const startAudio = async () => {
+      if (hasStarted) return
       try {
         await audio.play()
-        setIsPlaying(true)
+        setHasStarted(true)
+        removeListeners()
       } catch {
-        // Si falla el autoplay, esperar interacción del usuario
-        const handleInteraction = async () => {
-          try {
-            await audio.play()
-            setIsPlaying(true)
-            document.removeEventListener('click', handleInteraction)
-            document.removeEventListener('touchstart', handleInteraction)
-            document.removeEventListener('keydown', handleInteraction)
-          } catch (err) {
-            console.log('Error playing audio:', err)
-          }
-        }
-
-        document.addEventListener('click', handleInteraction)
-        document.addEventListener('touchstart', handleInteraction)
-        document.addEventListener('keydown', handleInteraction)
-
-        return () => {
-          document.removeEventListener('click', handleInteraction)
-          document.removeEventListener('touchstart', handleInteraction)
-          document.removeEventListener('keydown', handleInteraction)
-        }
+        // Silently fail - will retry on next interaction
       }
     }
 
-    playAudio()
-  }, [])
+    // Intentar reproducir inmediatamente
+    startAudio()
+
+    // Si falla, escuchar CUALQUIER interacción para reproducir
+    const handleAnyInteraction = () => {
+      startAudio()
+    }
+
+    const removeListeners = () => {
+      document.removeEventListener('click', handleAnyInteraction)
+      document.removeEventListener('touchstart', handleAnyInteraction)
+      document.removeEventListener('keydown', handleAnyInteraction)
+      document.removeEventListener('scroll', handleAnyInteraction)
+      document.removeEventListener('mousemove', handleAnyInteraction)
+      document.removeEventListener('pointerdown', handleAnyInteraction)
+    }
+
+    // Agregar listeners a múltiples eventos
+    document.addEventListener('click', handleAnyInteraction)
+    document.addEventListener('touchstart', handleAnyInteraction)
+    document.addEventListener('keydown', handleAnyInteraction)
+    document.addEventListener('scroll', handleAnyInteraction)
+    document.addEventListener('mousemove', handleAnyInteraction, { once: true })
+    document.addEventListener('pointerdown', handleAnyInteraction)
+
+    return () => {
+      removeListeners()
+    }
+  }, [hasStarted])
 
   const toggleMute = () => {
     if (audioRef.current) {
-      if (isMuted) {
-        audioRef.current.muted = false
-        setIsMuted(false)
-      } else {
-        audioRef.current.muted = true
-        setIsMuted(true)
-      }
+      audioRef.current.muted = !isMuted
+      setIsMuted(!isMuted)
     }
   }
 
@@ -75,7 +77,7 @@ export default function AudioController({ src }: AudioControllerProps) {
         onClick={toggleMute}
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1, type: 'spring' }}
+        transition={{ delay: 0.5, type: 'spring' }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all"
@@ -127,19 +129,6 @@ export default function AudioController({ src }: AudioControllerProps) {
           </svg>
         )}
       </motion.button>
-
-      {/* Indicador de "Toca para activar música" si no está reproduciendo */}
-      {!isPlaying && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-24 right-6 z-50 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg"
-        >
-          <p className="text-sm font-medium text-gray-700">
-            🎵 Toca para activar la música
-          </p>
-        </motion.div>
-      )}
     </>
   )
 }
