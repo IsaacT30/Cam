@@ -13,14 +13,30 @@
 html {
   scroll-behavior: smooth;
   height: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   font-family: 'Satisfy', cursive;
-  background: #1a1a2e;
+  background: transparent;
   min-height: 100%;
+  min-height: -webkit-fill-available;
   overflow-x: hidden;
   color: white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS viewport fix */
+@supports (-webkit-touch-callout: none) {
+  body {
+    min-height: -webkit-fill-available;
+  }
+  
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
 }
 
 #__next {

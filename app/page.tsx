@@ -356,10 +356,12 @@ export default function Home() {
               backgroundImage: 'url(/assets/chocolate.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              backgroundRepeat: 'repeat',
+              backgroundColor: '#f5f5dc',
             }}
           >
             {/* Overlay sutil para mejor contraste */}
-            <div className="absolute inset-0 bg-black/10" />
+            <div className="absolute inset-0 bg-white/10" />
             <div className="relative z-10 text-center">
               <BalloonButton onBack={() => setCurrentPage('home')} />
             </div>
