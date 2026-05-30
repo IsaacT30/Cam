@@ -234,7 +234,12 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
                 height: `${getBalloonSize() * 1.2}px`,
               }}
             >
-              {/* Globo con color rosa degradado */}
+              <svg
+                viewBox="0 0 100 130"
+                className="w-full h-full"
+                style={{ filter: 'drop-shadow(0 4px 15px rgba(255, 105, 180, 0.4))' }}
+              >
+                {/* Globo con color rosa degradado */}
                 <defs>
                   <linearGradient id="balloonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#ff69b4" />
@@ -288,30 +293,6 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
                   rx="10"
                   ry="15"
                   fill="rgba(255, 255, 255, 0.4)"
-                  transform="rotate(-30 35 30)"
-                />
-                {/* Nudo del globo */}
-                <path
-                  d="M45 90 Q50 95 55 90 L52 95 L48 95 Z"
-                  fill="transparent"
-                  stroke="#ff69b4"
-                  strokeWidth="2"
-                />
-                {/* Hilo del globo */}
-                <path
-                  d="M50 95 Q55 105 45 115 Q55 110 50 120"
-                  fill="none"
-                  stroke="#ff69b4"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                {/* Brillo */}
-                <ellipse
-                  cx="35"
-                  cy="30"
-                  rx="8"
-                  ry="12"
-                  fill="rgba(255, 255, 255, 0.2)"
                   transform="rotate(-30 35 30)"
                 />
               </svg>
