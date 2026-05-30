@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Fireworks from '@/components/Fireworks'
 
@@ -8,11 +8,27 @@ interface BalloonButtonProps {
   onBack: () => void
 }
 
+interface ConfettiParticle {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  life: number
+  color: string
+  size: number
+  shape: 'circle' | 'square' | 'triangle' | 'star'
+  rotation: number
+  rotationSpeed: number
+}
+
 export default function BalloonButton({ onBack }: BalloonButtonProps) {
   const [clicks, setClicks] = useState(0)
   const [showLetter, setShowLetter] = useState(false)
   const [isPopped, setIsPopped] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const confettiRef = useRef<ConfettiParticle[]>([])
+  const animationRef = useRef<number>(0)
 
   const totalClicks = 20
 
@@ -26,10 +42,11 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
     if (newClicks >= totalClicks) {
       setTimeout(() => {
         setIsPopped(true)
+        setShowConfetti(true)
         createConfetti()
         setTimeout(() => {
           setShowLetter(true)
-        }, 800)
+        }, 1200)
       }, 300)
     }
   }
@@ -44,62 +61,121 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
 
-    const confetti = Array.from({ length: 150 }, () => {
+    const colors = [
+      '#ff1744', '#f50057', '#ff3d00',
+      '#ff6f00', '#ffd600', '#76ff03',
+      '#00e676', '#00bcd4', '#2196f3',
+      '#3f51b5', '#673ab7', '#d32f2f',
+      '#ff69b4', '#ff8c00', '#FFD700',
+      '#00FF7F', '#FF6347', '#9400D3'
+    ]
+
+    const shapes: ConfettiParticle['shape'][] = ['circle', 'square', 'triangle', 'star']
+
+    // Crear confeti desde el centro (donde estaba el globo)
+    confettiRef.current = Array.from({ length: 300 }, () => {
       const angle = Math.random() * Math.PI * 2
-      const velocity = 5 + Math.random() * 12
+      const velocity = 8 + Math.random() * 18
       
       return {
         x: canvas.width / 2,
         y: canvas.height / 2,
-        vx: Math.cos(angle) * velocity,
-        vy: Math.sin(angle) * velocity - 5,
-        life: 255,
-        color: [
-          '#ff1744', '#f50057', '#ff3d00',
-          '#ff6f00', '#ffd600', '#76ff03',
-          '#00e676', '#00bcd4', '#2196f3',
-          '#3f51b5', '#673ab7', '#d32f2f',
-          '#ff69b4', '#ff8c00'
-        ][Math.floor(Math.random() * 14)],
-        size: 4 + Math.random() * 8,
-        shape: Math.random() > 0.5 ? 'circle' : 'square',
+        vx: Math.cos(angle) * velocity * (0.5 + Math.random()),
+        vy: Math.sin(angle) * velocity - 8 - Math.random() * 5,
+        life: 300 + Math.random() * 100,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 6 + Math.random() * 12,
+        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.3,
       }
     })
 
-    let animationId: number
+    const drawStar = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
+      const spikes = 5
+      const outerRadius = size
+      const innerRadius = size / 2
+      let rot = Math.PI / 2 * 3
+      const step = Math.PI / spikes
+
+      ctx.beginPath()
+      ctx.moveTo(x, y - outerRadius)
+
+      for (let i = 0; i < spikes; i++) {
+        ctx.lineTo(x + Math.cos(rot) * outerRadius, y + Math.sin(rot) * outerRadius)
+        rot += step
+        ctx.lineTo(x + Math.cos(rot) * innerRadius, y + Math.sin(rot) * innerRadius)
+        rot += step
+      }
+      ctx.lineTo(x, y - outerRadius)
+      ctx.closePath()
+      ctx.fill()
+    }
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      confetti.forEach((c, index) => {
+      confettiRef.current.forEach((c) => {
         c.x += c.vx
         c.y += c.vy
-        c.vy += 0.3
-        c.life -= 2
+        c.vy += 0.25 // Gravedad
+        c.vx *= 0.99 // Fricción
+        c.life -= 1.5
+        c.rotation += c.rotationSpeed
 
         if (c.life > 0) {
-          ctx.globalAlpha = c.life / 255
+          ctx.save()
+          ctx.translate(c.x, c.y)
+          ctx.rotate(c.rotation)
+          ctx.globalAlpha = Math.min(c.life / 150, 1)
           ctx.fillStyle = c.color
+          ctx.shadowBlur = 5
+          ctx.shadowColor = c.color
           
-          if (c.shape === 'circle') {
-            ctx.beginPath()
-            ctx.arc(c.x, c.y, c.size / 2, 0, Math.PI * 2)
-            ctx.fill()
-          } else {
-            ctx.fillRect(c.x - c.size / 2, c.y - c.size / 2, c.size, c.size)
+          switch (c.shape) {
+            case 'circle':
+              ctx.beginPath()
+              ctx.arc(0, 0, c.size / 2, 0, Math.PI * 2)
+              ctx.fill()
+              break
+            case 'square':
+              ctx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size)
+              break
+            case 'triangle':
+              ctx.beginPath()
+              ctx.moveTo(0, -c.size / 2)
+              ctx.lineTo(-c.size / 2, c.size / 2)
+              ctx.lineTo(c.size / 2, c.size / 2)
+              ctx.closePath()
+              ctx.fill()
+              break
+            case 'star':
+              drawStar(ctx, 0, 0, c.size / 2)
+              break
           }
+          
+          ctx.restore()
         }
       })
 
       ctx.globalAlpha = 1
+      ctx.shadowBlur = 0
 
-      if (confetti.some(c => c.life > 0)) {
-        animationId = requestAnimationFrame(animate)
+      if (confettiRef.current.some(c => c.life > 0)) {
+        animationRef.current = requestAnimationFrame(animate)
       }
     }
 
     animate()
   }
+
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [])
 
   const getBalloonSize = () => {
     const percentage = clicks / totalClicks
@@ -119,7 +195,41 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
 
       <div className="relative z-10">
         {!isPopped && (
-          <>
+          <div className="flex flex-col items-center">
+            {/* Título animado */}
+            <motion.h2
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-2xl md:text-4xl font-black text-white mb-6 text-center"
+              style={{
+                fontFamily: "'Poppins', sans-serif",
+                textShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              ¡Toca el globo hasta reventarlo! 🎈
+            </motion.h2>
+
+            {/* Contador de clicks */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-4 px-6 py-2 bg-white/90 rounded-full shadow-lg"
+            >
+              <span className="text-lg font-bold text-pink-600">
+                {clicks} / {totalClicks} toques
+              </span>
+            </motion.div>
+
+            {/* Barra de progreso */}
+            <div className="w-64 h-3 bg-white/30 rounded-full mb-8 overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-pink-400 to-red-500 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${(clicks / totalClicks) * 100}%` }}
+                transition={{ type: 'spring', stiffness: 100 }}
+              />
+            </div>
+
             <motion.button
               onClick={handleBalloonClick}
               disabled={clicks >= totalClicks}
@@ -140,7 +250,21 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
             >
               <span className="text-6xl">🎈</span>
             </motion.button>
-          </>
+
+            {/* Texto de motivación */}
+            <motion.p
+              key={clicks}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mt-4 text-lg font-bold text-white"
+              style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
+            >
+              {clicks < 5 && '¡Dale, tu puedes! 💪'}
+              {clicks >= 5 && clicks < 10 && '¡Sigue así! 🔥'}
+              {clicks >= 10 && clicks < 15 && '¡Ya casi! 😍'}
+              {clicks >= 15 && clicks < 20 && '¡Un poquito más! 🎉'}
+            </motion.p>
+          </div>
         )}
 
         <AnimatePresence>
@@ -149,7 +273,7 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
               initial={{ opacity: 0, scale: 0.5, y: 50 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5 }}
-              className="mt-8 md:mt-12 p-4 md:p-8 bg-white rounded-3xl max-w-sm md:max-w-2xl shadow-2xl border-4 border-pink-300 max-h-[90vh] overflow-y-auto"
+              className="mt-8 md:mt-12 p-4 md:p-8 bg-white/95 backdrop-blur-sm rounded-3xl max-w-sm md:max-w-2xl shadow-2xl border-4 border-pink-300 max-h-[80vh] overflow-y-auto"
             >
               <motion.div
                 animate={{ rotate: [0, 5, -5, 0] }}
