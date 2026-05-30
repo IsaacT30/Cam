@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Fireworks from '@/components/Fireworks'
+import Image from 'next/image'
 
 interface BalloonButtonProps {
   onBack: () => void
@@ -29,8 +30,30 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const confettiRef = useRef<ConfettiParticle[]>([])
   const animationRef = useRef<number>(0)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const totalClicks = 20
+
+  useEffect(() => {
+    // Crear el elemento de audio
+    audioRef.current = new Audio('/assets/cumple.mp3')
+    audioRef.current.loop = true
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+    }
+  }, [])
+
+  const playMusic = () => {
+    if (audioRef.current) {
+      audioRef.current.play().catch(() => {
+        // El navegador puede bloquear autoplay, ignorar el error
+      })
+    }
+  }
 
   const handleBalloonClick = () => {
     if (clicks >= totalClicks || isPopped) return
@@ -43,6 +66,7 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
       setTimeout(() => {
         setIsPopped(true)
         setShowConfetti(true)
+        playMusic()
         createConfetti()
         setTimeout(() => {
           setShowLetter(true)
@@ -179,12 +203,10 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
 
   const getBalloonSize = () => {
     const percentage = clicks / totalClicks
-    return 150 + percentage * 100
+    return 120 + percentage * 100
   }
 
-  const getBalloonScale = () => {
-    return 1 + (clicks / totalClicks) * 0.3
-  }
+  const photos = ['/assets/c2.jpeg', '/assets/c3.jpeg', '/assets/c4.jpeg', '/assets/c5.jpeg']
 
   return (
     <>
@@ -193,77 +215,82 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
         className="absolute inset-0 pointer-events-none"
       />
 
-      <div className="relative z-10">
+      <div className="relative z-10 w-full px-4">
         {!isPopped && (
           <div className="flex flex-col items-center">
-            {/* Título animado */}
-            <motion.h2
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-2xl md:text-4xl font-black text-white mb-6 text-center"
-              style={{
-                fontFamily: "'Poppins', sans-serif",
-                textShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
-              }}
-            >
-              ¡Toca el globo hasta reventarlo! 🎈
-            </motion.h2>
-
-            {/* Contador de clicks */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mb-4 px-6 py-2 bg-white/90 rounded-full shadow-lg"
-            >
-              <span className="text-lg font-bold text-pink-600">
-                {clicks} / {totalClicks} toques
-              </span>
-            </motion.div>
-
-            {/* Barra de progreso */}
-            <div className="w-64 h-3 bg-white/30 rounded-full mb-8 overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-pink-400 to-red-500 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${(clicks / totalClicks) * 100}%` }}
-                transition={{ type: 'spring', stiffness: 100 }}
-              />
-            </div>
-
+            {/* Solo el globo silueta que se infla */}
             <motion.button
               onClick={handleBalloonClick}
               disabled={clicks >= totalClicks}
               animate={{
-                scale: getBalloonScale(),
+                scale: 1 + (clicks / totalClicks) * 0.4,
               }}
               transition={{ type: 'spring', stiffness: 100, damping: 10 }}
-              whileHover={clicks < totalClicks ? { scale: getBalloonScale() * 1.05 } : {}}
-              whileTap={clicks < totalClicks ? { scale: getBalloonScale() * 0.98 } : {}}
-              className="relative flex items-center justify-center cursor-pointer transition-none rounded-full"
+              whileHover={clicks < totalClicks ? { scale: (1 + (clicks / totalClicks) * 0.4) * 1.05 } : {}}
+              whileTap={clicks < totalClicks ? { scale: (1 + (clicks / totalClicks) * 0.4) * 0.98 } : {}}
+              className="relative cursor-pointer transition-none"
               style={{
-                background: 'radial-gradient(135% 135% at 50% 0%, rgba(255, 105, 180, 0.8), rgba(255, 23, 68, 1))',
-                boxShadow: `0 ${20 + clicks * 2}px ${50 + clicks * 3}px rgba(255, 23, 68, ${0.3 + clicks * 0.02})`,
                 width: `${getBalloonSize()}px`,
-                height: `${getBalloonSize()}px`,
-                borderRadius: '50%',
+                height: `${getBalloonSize() * 1.2}px`,
               }}
             >
-              <span className="text-6xl">🎈</span>
-            </motion.button>
+              {/* Silueta del globo con borde */}
+              <svg
+                viewBox="0 0 100 120"
+                className="w-full h-full"
+                style={{
+                  filter: `drop-shadow(0 ${10 + clicks * 1.5}px ${20 + clicks * 2}px rgba(255, 105, 180, ${0.3 + clicks * 0.02}))`,
+                }}
+              >
+                {/* Globo - solo silueta con borde */}
+                <ellipse
+                  cx="50"
+                  cy="45"
+                  rx="40"
+                  ry="45"
+                  fill="transparent"
+                  stroke="#ff69b4"
+                  strokeWidth="3"
+                  style={{
+                    filter: 'drop-shadow(0 0 10px rgba(255, 105, 180, 0.5))',
+                  }}
+                />
+                {/* Nudo del globo */}
+                <path
+                  d="M45 90 Q50 95 55 90 L52 95 L48 95 Z"
+                  fill="transparent"
+                  stroke="#ff69b4"
+                  strokeWidth="2"
+                />
+                {/* Hilo del globo */}
+                <path
+                  d="M50 95 Q55 105 45 115 Q55 110 50 120"
+                  fill="none"
+                  stroke="#ff69b4"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                {/* Brillo */}
+                <ellipse
+                  cx="35"
+                  cy="30"
+                  rx="8"
+                  ry="12"
+                  fill="rgba(255, 255, 255, 0.2)"
+                  transform="rotate(-30 35 30)"
+                />
+              </svg>
 
-            {/* Texto de motivación */}
-            <motion.p
-              key={clicks}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mt-4 text-lg font-bold text-white"
-              style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
-            >
-              {clicks < 5 && '¡Dale, tu puedes! 💪'}
-              {clicks >= 5 && clicks < 10 && '¡Sigue así! 🔥'}
-              {clicks >= 10 && clicks < 15 && '¡Ya casi! 😍'}
-              {clicks >= 15 && clicks < 20 && '¡Un poquito más! 🎉'}
-            </motion.p>
+              {/* Efecto de inflado */}
+              <motion.div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                animate={{
+                  boxShadow: clicks > 0 
+                    ? `0 0 ${clicks * 3}px rgba(255, 105, 180, ${0.2 + clicks * 0.03}), inset 0 0 ${clicks * 2}px rgba(255, 105, 180, 0.1)`
+                    : 'none',
+                }}
+              />
+            </motion.button>
           </div>
         )}
 
@@ -273,67 +300,119 @@ export default function BalloonButton({ onBack }: BalloonButtonProps) {
               initial={{ opacity: 0, scale: 0.5, y: 50 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5 }}
-              className="mt-8 md:mt-12 p-4 md:p-8 bg-white/95 backdrop-blur-sm rounded-3xl max-w-sm md:max-w-2xl shadow-2xl border-4 border-pink-300 max-h-[80vh] overflow-y-auto"
+              className="w-full flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-6"
             >
+              {/* Fotos izquierda - solo visible en desktop */}
+              <div className="hidden lg:flex flex-col gap-3">
+                {[photos[0], photos[1]].map((photo, index) => (
+                  <motion.div
+                    key={`left-${index}`}
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + index * 0.2 }}
+                    className="relative w-24 h-32 rounded-lg overflow-hidden border-4 border-pink-300 shadow-lg"
+                    style={{
+                      transform: index === 0 ? 'rotate(-5deg)' : 'rotate(3deg)',
+                    }}
+                  >
+                    <Image
+                      src={photo}
+                      alt={`Foto ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Carta principal */}
               <motion.div
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
+                className="p-4 md:p-6 lg:p-8 bg-white/95 backdrop-blur-sm rounded-3xl max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl shadow-2xl border-4 border-pink-300 max-h-[70vh] overflow-y-auto"
               >
-                <h3 
-                  className="text-lg md:text-3xl font-black mb-4 md:mb-8 text-center"
-                  style={{
-                    fontFamily: "'Poppins', sans-serif",
-                    color: '#ff006e',
-                  }}
+                <motion.div
+                  animate={{ rotate: [0, 2, -2, 0] }}
+                  transition={{ duration: 3, repeat: Infinity }}
                 >
-                ALGO QUE NO TE HABLARA ISAAC, TE HABLARA UN NIÑITO......
-                </h3>
+                  <h3 
+                    className="text-base sm:text-lg md:text-2xl lg:text-3xl font-black mb-3 md:mb-6 text-center"
+                    style={{
+                      fontFamily: "'Poppins', sans-serif",
+                      color: '#ff006e',
+                    }}
+                  >
+                  ALGO QUE NO TE HABLARA ISAAC, TE HABLARA UN NIÑITO......
+                  </h3>
+                </motion.div>
+                <div 
+                  className="text-gray-800 leading-relaxed text-left font-medium text-xs sm:text-sm md:text-base"
+                  style={{ fontFamily: "'Poppins', sans-serif", lineHeight: '1.6', textAlign: 'justify' }}
+                >
+                  <p className="mb-3">
+                    BUENO... COMO TE DIJE POR CHAT.... AHORA SI SOY LIBRE DE HABLAR PORQUE ME PUSIERON LIMITE EN WHATSAPP,
+                  </p>
+                  <p className="mb-3">
+                    NUEVAMENTE QUIERO QUE SEPAS QUE ESTOY MUY FELIZ DE PODER COMPARTIR UN AÑITO DE VIDA JUNTO A TI, HE CONOCIDO A CAMILA Y SE CUAL ES ESA NIÑA TAN BELLA.... PERO AHORA ME ESTAS ENSEÑANDO A CONOCER A VALENTINA Y ES ALGO QUE WOW NO CAMBIA EN NADA JAJAJA.... PORQUE PARA MI SIEMPRE SERAS CAMILA OKEY??.....Y DEPUES DE TODO Y MUCHO BLA BLA BLA Y TUS OK,MAÑANA (corazon verde, morado y blanco) Y MI PRIMITO CHIQUITO Y QUE PASIVA, Y TALES,
+                  </p>
+                  <p className="mb-3">
+                    JAMAS TE LO HE DICHO Y PUES PIENSO QUE POR FIN A LLEGADO EL MOMENTO DE DECIRTE &quot;FELIZ CUMPLEAÑOS&quot;, A PASADO MILLONES DE SIGLOS Y MILLONES DE AÑOS TENGO EL GUSTO DE PODER DECIRTE ESO JAJAJAJA....QUE ORGULLO EL SABER QUE ERES UNA NIÑA QUE NO DA PROBLEMAS A NADIE Y SIEMPRES ESTAS PARA LAS PERSONAS QUE ESTAN A TU ALREDEDOR, EN ESTE DIA TAN ESPACIAL QUIERO DECIRTE QUE NUNCA CAMBIES QUE SIGAS SIENDO ESA NIÑA TAN LINDA QUE ERES, QUE JAMAS DEJES ESOS VALORES TAN BUENOS QUE TE HAN ENSEÑADO PAPI Y MAMI, QUE SABES QUE CUENTAS CON UN AMIGO PARA LAS QUE SEA, QUE SIEMPRE TENDRAS MI APOYO PARA LAS COSAS BUENAS COMO TE LO VIVO DICIENDO, QUE ESAS IDEITAS LOCAS QUE A VECES PASAN POR ESA CABAZITA SE VAYAN QUEDANDO ATRAS, PORQUE LOS AMIGOS NO SOLO SOMOS PARA JODER, TAMBIEN SOMOS APOYO PARA CUANDO NOS SENTIMOS MAL, SABES QUE ME GUSTA ESCUCHARTE DE LAS PENAS QUE TIENES POR LOS FEOS ESOS DE TUS NOVIOS JAJAJA....
+                  </p>
+                  <p className="mb-3">
+                    POCO A POCO HE IDO CONOCIENDO LA NIÑA QUE ERES Y JAMAS ME ARREPENTIRE DE HABER PODIDO TENER UNA AMISTAD CONTIGO, YA 19 PRIMAVERAS, YA ESTAS VIEJITA, CUCHITA JAJAJA... LLEGASTE A LA EDAD EN LA QUE ADIOS TOBILLOS CADA MES JAJAJ... PIENSO QUE YA ES HORA DE QUE DEJES DE ANDAR ILUSIONANDO A LA GENTE PORQUE SI NO MUCHOS TEMAS QUE HABLAR EN EL -5 JAJAJA...
+                  </p>
+                  <p className="mb-3">
+                    ESPERO QUE HOY TE FESTEJEN DE LO MEJOR Y QUE VIVA LA CUMPLEAÑERA........ SE QUE ESTO NO FUE LA GRAN COSA PERO PIENSO QUE CADA UNO PUEDE HACER ESPECIAL ALGO A SU MANERA Y CREO QUE HOY ME TOCO A LA MIA JAJAJA...
+                  </p>
+                  <p className="font-bold text-pink-600">
+                    TE QUIERO MUCHISIMO CAMILITA HERMOSA................
+                  </p>
+                </div>
               </motion.div>
-              <p 
-                className="text-gray-800 leading-relaxed text-left font-medium text-xs md:text-base"
-                style={{ fontFamily: "'Poppins', sans-serif", lineHeight: '1.6' }}
-              >
-                <div style={{ textAlign: "justify" }}>
-BUENO... COMO TE DIJE POR CHAT.... AHORA SI SOY LIBRE DE HABLAR PORQUE ME PUSIERON LIMITE EN WHATSAPP,
 
-NUEVAMENTE QUIERO QUE SEPAS QUE ESTOY MUY FELIZ DE PODER COMPARTIR UN AÑITO DE VIDA JUNTO A TI, HE 
+              {/* Fotos derecha - solo visible en desktop */}
+              <div className="hidden lg:flex flex-col gap-3">
+                {[photos[2], photos[3]].map((photo, index) => (
+                  <motion.div
+                    key={`right-${index}`}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + index * 0.2 }}
+                    className="relative w-24 h-32 rounded-lg overflow-hidden border-4 border-pink-300 shadow-lg"
+                    style={{
+                      transform: index === 0 ? 'rotate(5deg)' : 'rotate(-3deg)',
+                    }}
+                  >
+                    <Image
+                      src={photo}
+                      alt={`Foto ${index + 3}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </motion.div>
+                ))}
+              </div>
 
-CONOCIDO A CAMILA Y SE CUAL ES ESA NIÑA TAN BELLA.... PERO AHORA ME ESTAS ENSEÑANDO A CONOCER A VALENTINA
-
-Y ES ALGO QUE WOW NO CAMBIA EN NADA JAJAJA.... PORQUE PARA MI SIEMPRE SERAS CAMILA OKEY??.....Y DEPUES DE TODO 
-
-Y MUCHO BLA BLA BLA Y TUS OK,MAÑANA (corazon verde, morado y blanco) Y MI PRIMITO CHIQUITO Y QUE PASIVA, Y TALES,
-
-JAMAS TE LO HE DICHO Y PUES PIENSO QUE POR FIN A LLEGADO EL MOMENTO DE DECIRTE "FELIZ CUMPLEAÑOS", A PASADO
-
-MILLONES DE SIGLOS Y MILLONES DE AÑOS TENGO EL GUSTO DE PODER DECIRTE ESO JAJAJAJA....QUE ORGULLO 
-
-EL SABER QUE ERES UNA NIÑA QUE NO DA PROBLEMAS A NADIE Y SIEMPRES ESTAS PARA LAS PERSONAS QUE ESTAN A 
-
-TU ALREDEDOR, EN ESTE DIA TAN ESPACIAL QUIERO DECIRTE QUE NUNCA CAMBIES QUE SIGAS SIENDO ESA NIÑA TAN 
-
-LINDA QUE ERES, QUE JAMAS DEJES ESOS VALORES TAN BUENOS QUE TE HAN ENSEÑADO PAPI Y MAMI, QUE SABES QUE 
-
-CUENTAS CON UN AMIGO PARA LAS QUE SEA, QUE SIEMPRE TENDRAS MI APOYO PARA LAS COSAS BUENAS COMO TE LO VIVO
-
-DICIENDO, QUE ESAS IDEITAS LOCAS QUE A VECES PASAN POR ESA CABAZITA SE VAYAN QUEDANDO ATRAS, PORQUE LOS 
-
-AMIGOS NO SOLO SOMOS PARA JODER, TAMBIEN SOMOS APOYO PARA CUANDO NOS SENTIMOS MAL, SABES QUE ME GUSTA 
-
-ESCUCHARTE DE LAS PENAS QUE TIENES POR LOS FEOS ESOS DE TUS NOVIOS JAJAJA.... POCO A POCO HE IDO CONOCIENDO
-
-LA NIÑA QUE ERES Y JAMAS ME ARREPENTIRE DE HABER PODIDO TENER UNA AMISTAD CONTIGO, YA 19 PRIMAVERAS, YA 
-
-ESTAS VIEJITA, CUCHITA JAJAJA... LLEGASTE A LA EDAD EN LA QUE ADIOS TOBILLOS CADA MES JAJAJ... PIENSO QUE YA
-
-ES HORA DE QUE DEJES DE ANDAR ILUSIONANDO A LA GENTE PORQUE SI NO MUCHOS TEMAS QUE HABLAR EN EL -5 JAJAJA...
-
-ESPERO QUE HOY TE FESTEJEN DE LO MEJOR Y QUE VIVA LA CUMPLEAÑERA........ SE QUE ESTO NO FUE LA GRAN COSA PERO 
-
-PIENSO QUE CADA UNO PUEDE HACER ESPECIAL ALGO A SU MANERA Y CREO QUE HOY ME TOCO A LA MIA JAJAJA...
-
-TE QUIERO MUCHISIMO CAMILITA HERMOSA................</div>
-              </p>
+              {/* Fotos en mobile - abajo de la carta */}
+              <div className="flex lg:hidden gap-2 mt-4 flex-wrap justify-center">
+                {photos.map((photo, index) => (
+                  <motion.div
+                    key={`mobile-${index}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
+                    className="relative w-16 h-20 sm:w-20 sm:h-24 rounded-lg overflow-hidden border-3 border-pink-300 shadow-lg"
+                    style={{
+                      transform: `rotate(${(index - 1.5) * 5}deg)`,
+                    }}
+                  >
+                    <Image
+                      src={photo}
+                      alt={`Foto ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -358,7 +437,7 @@ TE QUIERO MUCHISIMO CAMILITA HERMOSA................</div>
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5 }}
             onClick={onBack}
-            className="btn-nav mt-8"
+            className="mt-6 px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold rounded-full text-lg shadow-lg hover:shadow-xl transition-all mx-auto block"
           >
             ← Volver al Inicio
           </motion.button>

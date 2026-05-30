@@ -1,28 +1,39 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface PasswordScreenProps {
   onSuccess: () => void
 }
 
+interface Star {
+  id: number
+  x: number
+  y: number
+  size: number
+  delay: number
+  duration: number
+}
+
 export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState(false)
-  const [showHint, setShowHint] = useState(false)
-  const [hearts, setHearts] = useState<{ id: number; x: number; delay: number }[]>([])
+  const [stars, setStars] = useState<Star[]>([])
 
   const correctPassword = '3005'
 
   useEffect(() => {
-    // Crear corazones flotantes
-    const newHearts = Array.from({ length: 20 }, (_, i) => ({
+    // Crear estrellas fugaces
+    const newStars = Array.from({ length: 50 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
       delay: Math.random() * 5,
+      duration: Math.random() * 3 + 2,
     }))
-    setHearts(newHearts)
+    setStars(newStars)
   }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,31 +52,141 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
 
   return (
     <div 
-      className="w-full min-h-screen flex items-center justify-center overflow-hidden"
+      className="w-full min-h-screen flex items-center justify-center overflow-hidden relative"
       style={{
-        background: 'linear-gradient(135deg, #ff6b9d 0%, #c44569 50%, #ff6b9d 100%)',
-        position: 'relative',
+        background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
       }}
     >
-      {/* Corazones flotantes de fondo */}
-      {hearts.map((heart) => (
+      {/* Estrellas estáticas de fondo */}
+      {stars.map((star) => (
         <motion.div
-          key={heart.id}
-          className="absolute text-4xl md:text-6xl opacity-20 pointer-events-none"
-          style={{ left: `${heart.x}%` }}
-          initial={{ y: '100vh', rotate: 0 }}
-          animate={{ 
-            y: '-100vh', 
-            rotate: [0, 15, -15, 0],
+          key={star.id}
+          className="absolute rounded-full pointer-events-none"
+          style={{ 
+            left: `${star.x}%`, 
+            top: `${star.y}%`,
+            width: star.size,
+            height: star.size,
+            background: 'white',
+            boxShadow: `0 0 ${star.size * 2}px white`,
+          }}
+          animate={{
+            opacity: [0.3, 1, 0.3],
+            scale: [1, 1.2, 1],
           }}
           transition={{
-            duration: 8 + Math.random() * 4,
-            delay: heart.delay,
+            duration: star.duration,
+            delay: star.delay,
             repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+
+      {/* Lluvia de estrellas fugaces */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.div
+          key={`shooting-${i}`}
+          className="absolute w-1 h-1 bg-white rounded-full pointer-events-none"
+          style={{
+            left: `${Math.random() * 80 + 10}%`,
+            top: '-5%',
+            boxShadow: '0 0 6px 2px rgba(255,255,255,0.8), 0 0 30px 4px rgba(255,200,100,0.5)',
+          }}
+          animate={{
+            x: [0, 150],
+            y: [0, 400],
+            opacity: [1, 1, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            delay: i * 0.8 + Math.random() * 2,
+            repeat: Infinity,
+            repeatDelay: 3 + Math.random() * 4,
             ease: 'linear',
           }}
+        />
+      ))}
+
+      {/* Texto flotante CAMI y VALE */}
+      <motion.div
+        className="absolute text-6xl md:text-8xl font-black opacity-10 pointer-events-none"
+        style={{
+          left: '10%',
+          top: '20%',
+          color: '#ff69b4',
+          fontFamily: "'Poppins', sans-serif",
+          textShadow: '0 0 30px rgba(255,105,180,0.5)',
+        }}
+        animate={{
+          y: [0, -20, 0],
+          opacity: [0.05, 0.15, 0.05],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      >
+        CAMI
+      </motion.div>
+
+      <motion.div
+        className="absolute text-6xl md:text-8xl font-black opacity-10 pointer-events-none"
+        style={{
+          right: '10%',
+          bottom: '20%',
+          color: '#ffd700',
+          fontFamily: "'Poppins', sans-serif",
+          textShadow: '0 0 30px rgba(255,215,0,0.5)',
+        }}
+        animate={{
+          y: [0, 20, 0],
+          opacity: [0.05, 0.15, 0.05],
+        }}
+        transition={{
+          duration: 4,
+          delay: 2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      >
+        VALE
+      </motion.div>
+
+      {/* Fuegos artificiales simulados */}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <motion.div
+          key={`firework-${i}`}
+          className="absolute pointer-events-none"
+          style={{
+            left: `${15 + i * 15}%`,
+            top: `${20 + (i % 3) * 20}%`,
+          }}
         >
-          💖
+          {Array.from({ length: 12 }).map((_, j) => (
+            <motion.div
+              key={`particle-${i}-${j}`}
+              className="absolute w-2 h-2 rounded-full"
+              style={{
+                background: ['#ff69b4', '#ffd700', '#00ffff', '#ff6347', '#7fff00'][i % 5],
+                boxShadow: `0 0 10px ${['#ff69b4', '#ffd700', '#00ffff', '#ff6347', '#7fff00'][i % 5]}`,
+              }}
+              animate={{
+                x: [0, Math.cos((j / 12) * Math.PI * 2) * 60],
+                y: [0, Math.sin((j / 12) * Math.PI * 2) * 60],
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0],
+              }}
+              transition={{
+                duration: 1.5,
+                delay: i * 0.5 + 1,
+                repeat: Infinity,
+                repeatDelay: 4,
+                ease: 'easeOut',
+              }}
+            />
+          ))}
         </motion.div>
       ))}
 
@@ -102,17 +223,27 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
             textShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
           }}
         >
-          ¡Hola Princesa! 👑
+          Hola Neni Cumpleañera
         </motion.h1>
 
         <motion.p
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-xl md:text-2xl text-white/90 mb-8"
+          className="text-xl md:text-2xl text-white/90 mb-4"
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
           Ingresa la contraseña para ver tu sorpresa
+        </motion.p>
+
+        <motion.p
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="text-lg text-pink-300 mb-8"
+          style={{ fontFamily: "'Poppins', sans-serif" }}
+        >
+          La clave es única 💕
         </motion.p>
 
         {/* Formulario */}
@@ -134,7 +265,7 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
               className={`w-64 md:w-80 px-6 py-4 text-xl text-center rounded-full border-4 outline-none transition-all ${
                 error 
                   ? 'border-red-500 bg-red-100 text-red-900' 
-                  : 'border-white/50 bg-white/20 text-white placeholder-white/70 focus:border-white focus:bg-white/30'
+                  : 'border-pink-400/50 bg-white/10 text-white placeholder-white/70 focus:border-pink-400 focus:bg-white/20'
               }`}
               style={{ fontFamily: "'Poppins', sans-serif" }}
             />
@@ -155,42 +286,12 @@ export default function PasswordScreen({ onSuccess }: PasswordScreenProps) {
 
           <button
             type="submit"
-            className="px-10 py-4 bg-white text-pink-600 font-bold text-xl rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
+            className="px-10 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-xl rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
             Entrar 💖
           </button>
         </motion.form>
-
-        {/* Pista */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="mt-8"
-        >
-          <button
-            onClick={() => setShowHint(!showHint)}
-            className="text-white/80 hover:text-white underline transition-colors"
-            style={{ fontFamily: "'Poppins', sans-serif" }}
-          >
-            {showHint ? 'Ocultar pista' : '¿Necesitas una pista? 🤔'}
-          </button>
-          
-          <AnimatePresence>
-            {showHint && (
-              <motion.p
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mt-3 text-white/90 text-lg bg-white/20 px-6 py-3 rounded-full inline-block"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
-              >
-                💡 Una fecha muy especial... 30/05 
-              </motion.p>
-            )}
-          </AnimatePresence>
-        </motion.div>
       </motion.div>
     </div>
   )
