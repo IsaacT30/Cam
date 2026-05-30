@@ -6,18 +6,25 @@ import Fireworks from '@/components/Fireworks'
 import WishModal from '@/components/WishModal'
 import PhotoGallery from '@/components/PhotoGallery'
 import BalloonButton from '@/components/BalloonButton'
+import PasswordScreen from '@/components/PasswordScreen'
+import Image from 'next/image'
 
 type Page = 'home' | 'wishes' | 'gallery' | 'balloon'
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState<Page>('home')
   const [selectedWish, setSelectedWish] = useState<number | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const wishes = [
     'Que vas a comer a las horas que son y haras caso en todo lo que te digan tus papis',
     'Que dejaras el pasado atras y te enfocaras en el presente para construir un futuro lleno de felicidad',
     'Que esos pensamientos negativos que a veces te invaden se vayan y los reemplaces por amor propio y confianza en ti misma',
   ]
+
+  if (!isAuthenticated) {
+    return <PasswordScreen onSuccess={() => setIsAuthenticated(true)} />
+  }
 
   return (
     <div className="w-full">
@@ -30,7 +37,7 @@ export default function Home() {
             exit={{ opacity: 0 }}
             className="relative w-full min-h-screen"
           >
-            {/* 🏀 SECCIÓN HERO - REEMPLAZA basketball.jpg CON TU IMAGEN */}
+            {/* SECCIÓN HERO */}
             <div className="w-full h-screen flex flex-col items-center justify-center relative"
               style={{
                 backgroundColor: '#FFA500',
@@ -73,7 +80,7 @@ export default function Home() {
                   </h1>
                 </motion.div>
 
-                {/* Photo Frame */}
+                {/* Photo Frame con imagen c1 */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -84,8 +91,13 @@ export default function Home() {
                     style={{
                       boxShadow: '0 20px 60px rgba(255, 0, 110, 0.4)',
                     }}>
-                    <div className="w-full h-full bg-white/10 rounded-3xl overflow-hidden flex items-center justify-center text-8xl">
-                      👑
+                    <div className="w-full h-full rounded-3xl overflow-hidden relative">
+                      <Image
+                        src="/assets/c1.jpeg"
+                        alt="Foto de cumpleaños"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                   </div>
 
@@ -127,7 +139,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 🕷️ SECCIÓN OPCIONES - REEMPLAZA spiderman.jpg CON TU IMAGEN */}
+            {/* SECCIÓN OPCIONES */}
             <div 
               id="options-section"
               className="w-full min-h-screen flex flex-col items-center justify-center py-20 px-4 relative"
@@ -216,7 +228,6 @@ export default function Home() {
             exit={{ opacity: 0 }}
             className="w-full min-h-screen flex flex-col items-center justify-center p-6 relative"
             style={{
-              // 🌹 SECCIÓN DESEOS - REEMPLAZA flores.jpg CON TU IMAGEN DE DESEOS
               backgroundImage: 'url(/assets/flores.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -295,7 +306,6 @@ export default function Home() {
             exit={{ opacity: 0 }}
             className="w-full min-h-screen flex flex-col items-center justify-center p-6"
             style={{
-              // 📸 SECCIÓN GALERÍA - REEMPLAZA flores.jpg CON TU IMAGEN DE GALERÍA
               backgroundImage: 'url(/assets/flores.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -341,15 +351,15 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="w-full min-h-screen flex flex-col items-center justify-center p-6"
+            className="w-full min-h-screen flex flex-col items-center justify-center p-6 relative"
             style={{
-              // 🎈 SECCIÓN SORPRESA - REEMPLAZA chocolate.jpg CON TU IMAGEN DE FONDO
               backgroundImage: 'url(/assets/chocolate.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              backgroundAttachment: 'fixed',
             }}
           >
+            {/* Overlay sutil para mejor contraste */}
+            <div className="absolute inset-0 bg-black/10" />
             <div className="relative z-10 text-center">
               <BalloonButton onBack={() => setCurrentPage('home')} />
             </div>
